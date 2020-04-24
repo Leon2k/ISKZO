@@ -1,0 +1,40 @@
+/* ----------------------- Modbus includes ----------------------------------*/
+#include "include/mb.h"
+#include "include/mbconfig.h"
+#include "include/mbframe.h"
+#include "include/mbutils.h"
+
+/* -----------------------Slave Defines -------------------------------------*/
+
+#define S_DISCRETE_INPUT_START        0
+#define S_DISCRETE_INPUT_NDISCRETES   16
+
+#define S_COIL_START                  0
+#define S_COIL_NCOILS                 64
+
+#define S_REG_INPUT_START             0
+#define S_REG_INPUT_NREGS             10
+
+#define S_REG_HOLDING_START           0
+#define S_REG_HOLDING_NREGS           8
+
+/* slave mode: holding register's all address */
+#define          S_HD_RESERVE                     0
+/* slave mode: input register's all address */
+#define          S_IN_RESERVE                     0
+/* slave mode: coil's all address */
+#define          S_CO_RESERVE                     0
+/* slave mode: discrete's all address */
+#define          S_DI_RESERVE                     0
+
+USHORT usSRegInBuf[S_REG_INPUT_NREGS];
+USHORT usSRegHoldBuf[S_REG_HOLDING_NREGS];
+//extern uint16_t ModbusRegistersData16bit[S_REG_HOLDING_NREGS];
+
+eMBErrorCode eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs );
+eMBErrorCode eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode);
+eMBErrorCode eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode);
+eMBErrorCode eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete );
+void __critical_enter(void);
+void __critical_exit(void);
+

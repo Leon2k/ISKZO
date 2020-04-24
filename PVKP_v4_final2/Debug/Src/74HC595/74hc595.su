@@ -1,0 +1,3 @@
+74hc595.c:3:6:M74HC595_ClearData	8	static
+74hc595.c:8:6:M74HC595_EnableData	8	static
+74hc595.c:12:6:M74HC595_WriteData	24	static

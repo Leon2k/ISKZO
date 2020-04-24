@@ -1,0 +1,7 @@
+main_logic.c:18:6:ProcessCurrentLights	8	static
+main_logic.c:39:6:ProcessCurrentLEDs	24	static
+main_logic.c:132:6:ProcessKeyPad	16	static
+main_logic.c:216:6:ResetKeypadLEDs	16	static
+main_logic.c:220:6:GetSystemInputStateFromRegister	4	static
+main_logic.c:224:6:GetLightsInputStateFromRegister	4	static
+main_logic.c:228:6:ResetInputRegister	4	static

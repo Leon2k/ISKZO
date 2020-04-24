@@ -1,0 +1,5 @@
+utf8.c:5:8:utf8_str_char_size	24	static
+utf8.c:18:8:utf8_char_size	16	static
+utf8.c:35:9:utf8_char_decode	24	static
+utf8.c:65:8:utf8_char_encode	24	static
+utf8.c:94:6:utf8_char_validate	24	static

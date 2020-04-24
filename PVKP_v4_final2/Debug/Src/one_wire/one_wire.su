@@ -1,0 +1,14 @@
+one_wire.c:76:14:one_wire_init	48	static
+one_wire.c:104:9:one_wire_reset	32	static
+one_wire.c:124:6:one_wire_write_bit	32	static
+one_wire.c:139:9:one_wire_read_bit	32	static
+one_wire.c:159:6:one_wire_write_byte	24	static
+one_wire.c:168:9:one_wire_read_byte	24	static
+one_wire.c:181:6:one_wire_write	32	static
+one_wire.c:189:6:one_wire_read	40	static
+one_wire.c:200:16:one_wire_crc_iter	24	static
+one_wire.c:218:9:one_wire_calc_crc	24	static
+one_wire.c:228:7:one_wire_read_rom	24	static
+one_wire.c:250:7:one_wire_match_rom	16	static
+one_wire.c:268:7:one_wire_skip_rom	16	static
+one_wire.c:277:7:one_wire_search_roms	88	static

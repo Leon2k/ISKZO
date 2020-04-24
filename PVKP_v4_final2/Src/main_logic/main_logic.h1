@@ -1,0 +1,147 @@
+#include "stdbool.h"
+#include "stdint.h"
+//#include "../one_wire/one_wire.h"
+
+#define NumOfRegs				8					// Количество регистров Modbus
+
+//static byte MechanicCard[8] = {0x01,0x8C,0x3A,0x5F,0x00,0x06,0x00,0x7B};	//111 528 270 474 117 243
+//static byte OperatorCard[8] = {0x01,0x4C,0x3B,0x94,0x00,0x3F,0x00,0x1B};	//93 515 199 113 265 179
+//static byte OfficeKey[8] = {0x01,0x52,0x56,0xA1,0x00,0x4F,0x00,0xD1};
+
+
+/* REG #0: ИСХОДЯЩИЙ
+ * 1й байт - Состояние ПВКП (1 = Ожидание авторизации, 2 = Запрос уровня доступа карты, 3 = Введен код простоя)
+ * 2й байт - Код простоя
+
+ * REG #1: ВХОДЯЩИЙ
+ * 1й байт - Состояние Системы (Уровень авторизации: 0 = Нет данных, 1 = Оператор, 2 = Механик, 3 = Настройщик??, 10 = Ошибка авторизации)
+ * 2й байт -
+
+ * REG #2: ВХОДЯЩИЙ
+ * 1й байт - Данные светофора (биты 0..2)
+ * 2й байт -
+
+ * REG #3:
+ * 1й байт - Текущая карта(байт 1) (обнулять при смене)
+ * 2й байт - Текущая карта(байт 2) (обнулять при смене)
+ * REG #4:
+ * 1й байт - Текущая карта(байт 3) (обнулять при смене)
+ * 2й байт - Текущая карта(байт 4) (обнулять при смене)
+ * REG #5:
+ * 1й байт - Текущая карта(байт 5) (обнулять при смене)
+ * 2й байт - Текущая карта(байт 6) (обнулять при смене)
+ * REG #6:
+ * 1й байт - Текущая карта(байт 7) (обнулять при смене)
+ * 2й байт - Текущая карта(байт 8) (обнулять при смене)
+ *
+ * REG #7:
+ * 1й байт - Версия прошивки
+ *
+ */
+extern uint16_t ModBusRegistersData16bit[NumOfRegs];// = {  				// Массив регистров Modbus (Начиная с 0-го!)
+		//0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+//};
+
+enum InputRegisterSystemState {									// 1 байт входящего регистра (Состояние системы)
+	UnknownInputState	= 0,
+	AuthorizedOperator 	= 1,
+	AuthorizedMechanic	= 2,
+	AuthorizedAdmin		= 3,
+	AuthorizeError		= 10
+};
+
+/* Состояния ПВКП */
+typedef enum _PVKPMode {
+	UnknownMode					= 0,		// Неизвестное состояние (Перед проверкой связи)
+	WaitForCard 				= 1,		// Ожидание карты !ВЫСШИЙ ПРИОРИТЕТ!
+	CardLevelRequest			= 2,		// Запрос уровня доступа
+	Authorized					= 3,		// Авторизован оператор
+	Working						= 4,		// Рабочее состояние (ЗЕЛЕНЫЙ сигнал)
+	Downtime_Started			= 5,		// Начало ПРОСТОЯ/РЕМОНТА (Красный, Желтый сигнал) Вкл таймер
+	Downtime_RepairChoice		= 6,		// Выбор причины РЕМОНТА (Механик)
+	Downtime_DowntimeChoice		= 7,		// Выбор причины ПРОСТОЯ (Оператор)
+	Downtime_ReparSelected		= 8,		// Выбрана причина РЕМОНТА (Механик)
+	Downtime_DowntimeSelected	= 9,		// Выбрана причина ПРОСТОЯ (Оператор)
+	DownTime_FailChoice			= 10,		// Тайм-аут выбора
+} PVKPMode;
+
+/* Состояния авторизации */
+/*
+enum AuthMode {
+	None,
+	Operator,
+	Mechanic
+};
+AuthMode WhoAuthorized = None;					// Переменная состояния авторизации
+*/
+
+typedef enum _Lights {
+	UnknownLight	= 0,
+	RedLight		= 0x4,
+	YellowLight		= 0x2,
+	GreenLight		= 0x1
+} Lights;
+
+
+uint32_t LastCardReadTime = 0;														// Время последнего считывания карты
+
+uint8_t CurrentRepairCode = 0;
+uint8_t CurrentDowntimeCode = 0;
+
+// Переменные для мигания
+uint32_t PrevBlinkTime = 0;
+bool BlinkState = false;
+
+uint16_t lastLightsState = 0;		// Последнее состояние светофора
+
+
+/* Глобальные переменные регистров */
+uint8_t SystemInputState = 0;								// Переменная Состояния Системы
+uint8_t LightsStateInput = 0;								// Переменная Светофора
+
+PVKPMode CurrentMode = WaitForCard;		// Переменная текущего глобального состояния ПВКП
+
+/* Светодиоды */
+
+enum LEDs {
+	LED_PIT,
+	LED_KAR,
+	LED_OBR,
+	LED_PRS,
+	LED_REM,
+	LED_1,
+	LED_2,
+	LED_3,
+	LED_4,
+	LED_5,
+	LED_6,
+	LED_7,
+	LED_8,
+	LED_9,
+	LED_10,
+	LED_11,
+	LED_12,
+	LED_13,
+	LED_14,
+	LED_15
+};
+
+uint8_t HighByteOfWord (uint16_t Register);
+uint8_t LowByteOfWord (uint16_t Register);
+void AnnulateCurrentCard (void);
+void SendCurrentCard (void);
+void SwitchCurrentPVKPMode (PVKPMode State);
+void CheckLink (void);
+void ProcessCurrentMode (void);
+void ProcessCurrentLEDs (void);
+void ProcessKeyPad (void);
+void ProcessCurrentLights (void);
+void GetSystemInputStateFromRegister (void);	//
+void GetLightsInputStateFromRegister (void);	//
+void ResetInputRegister (void);					//
+void ResetKeypadLEDs (void);					//
+void WriteCurrentCardToCardRegisters (void);
+Lights GetCurrentLights (void);
+void ReadNFCCard (void);
+bool IsNewCard (void);
+
